@@ -586,6 +586,36 @@
   resolved "https://registry.npmjs.org/@csstools/css-tokenizer/-/css-tokenizer-3.0.4.tgz"
   integrity sha512-Vd/9EVDiu6PPJt9yAh6roZP6El1xHrdvIVGjyBsHR0RYwNHgL7FJPyIIW4fANJNG6FtyZfvlRPpFI4ZM/lubvw==
 
+"@demox-labs/aleo-wallet-adapter-base@^0.0.23":
+  version "0.0.23"
+  resolved "https://registry.npmjs.org/@demox-labs/aleo-wallet-adapter-base/-/aleo-wallet-adapter-base-0.0.23.tgz"
+  integrity sha512-p0WvbKWuP2Rt05DAqnuXJV20k0J76p0DQvcVTck85MHCGwtak+xeJg6nxBl6Q/n7uc/opEWN0BLHqhynVzWlXA==
+  dependencies:
+    eventemitter3 "^4.0.7"
+
+"@demox-labs/aleo-wallet-adapter-leo@^0.0.25":
+  version "0.0.25"
+  resolved "https://registry.npmjs.org/@demox-labs/aleo-wallet-adapter-leo/-/aleo-wallet-adapter-leo-0.0.25.tgz"
+  integrity sha512-8Te8YiPR2k0We8vk/OBjdM18V/dDq0RpW743xCn2wotUzm4LA3hJwEW2+Jwy+BJqyNHBa7wIljdttEAT3OY6yA==
+  dependencies:
+    "@demox-labs/aleo-wallet-adapter-base" "^0.0.23"
+    nanoid "^4.0.0"
+
+"@demox-labs/aleo-wallet-adapter-react@^0.0.22":
+  version "0.0.22"
+  resolved "https://registry.npmjs.org/@demox-labs/aleo-wallet-adapter-react/-/aleo-wallet-adapter-react-0.0.22.tgz"
+  integrity sha512-X4Ys69MdEErzlQn8G+edf6LuQSMgKAZjOVaB9Wae1ZfJTABzVF21/0Y8/iodlVcNeTPoo5h3sKv3gLJV6zyeGg==
+  dependencies:
+    "@demox-labs/aleo-wallet-adapter-base" "^0.0.23"
+
+"@demox-labs/aleo-wallet-adapter-reactui@^0.0.36":
+  version "0.0.36"
+  resolved "https://registry.npmjs.org/@demox-labs/aleo-wallet-adapter-reactui/-/aleo-wallet-adapter-reactui-0.0.36.tgz"
+  integrity sha512-GCqrrDKCjuqsO6pUHhHc55pCVEBmi606vqizhEhndzo9YxrQajxZrlQFwqnB5qMeoYToICbKfUl4ESlGfdTuwg==
+  dependencies:
+    "@demox-labs/aleo-wallet-adapter-base" "^0.0.23"
+    "@demox-labs/aleo-wallet-adapter-react" "^0.0.22"
+
 "@dimforge/rapier3d-compat@~0.12.0":
   version "0.12.0"
   resolved "https://registry.npmjs.org/@dimforge/rapier3d-compat/-/rapier3d-compat-0.12.0.tgz"
@@ -12079,6 +12109,11 @@ nanoid@^3.3.11, nanoid@^3.3.6, nanoid@^3.3.7:
   version "3.3.11"
   resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.3.11.tgz"
   integrity sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==
+
+nanoid@^4.0.0:
+  version "4.0.2"
+  resolved "https://registry.npmjs.org/nanoid/-/nanoid-4.0.2.tgz"
+  integrity sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==
 
 nanostores@^0.10.3:
   version "0.10.3"

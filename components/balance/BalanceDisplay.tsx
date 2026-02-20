@@ -113,7 +113,7 @@ export const BalanceDisplay: React.FC = () => {
   // Current symbol for display
   const currentSymbol = network === 'SUI' ? 'USDC'
     : (network === 'SOL' ? (selectedCurrency || 'SOL') : network === 'XLM'
-      ? 'XLM' : network === 'XTZ' ? 'XTZ' : network === 'NEAR' ? 'NEAR' : 'BNB');
+      ? 'XLM' : network === 'XTZ' ? 'XTZ' : network === 'NEAR' ? 'NEAR' : (network === 'ALEO' ? 'ALEO' : 'ALEO'));
 
   return (
     <>
@@ -223,7 +223,8 @@ export const BalanceDisplay: React.FC = () => {
                             network === 'XLM' ? '/logos/stellar-xlm-logo.png' :
                               network === 'XTZ' ? '/logos/tezos-xtz-logo.png' :
                                 network === 'NEAR' ? '/logos/near-logo.svg' :
-                                  '/logos/bnb-bnb-logo.png'
+                                  network === 'ALEO' ? '/logos/aleo-logo.png' :
+                                    '/logos/aleo-logo.png'
                     }
                     alt={currentSymbol}
                     className="w-4 h-4 object-contain"

@@ -218,6 +218,29 @@ export const DepositModal: React.FC<DepositModalProps> = ({
         const { signedTxXdr } = await kit.signTransaction(transaction.toXDR());
         const result = await server.submitTransaction(TransactionBuilder.fromXDR(signedTxXdr, Networks.PUBLIC));
         txHash = (result as any).hash || (result as any).id || signedTxXdr.slice(0, 16);
+      } else if (network === 'ALEO') {
+        const { getAleoAdapter } = await import('@/lib/aleo/wallet');
+        const adapter = getAleoAdapter();
+        if (!adapter) throw new Error('Aleo adapter not initialized');
+        if (!adapter.publicKey) throw new Error('Aleo wallet not connected. Please connect Leo Wallet.');
+
+        const treasury = process.env.NEXT_PUBLIC_ALEO_TREASURY_ADDRESS;
+        if (!treasury) throw new Error('Aleo treasury address not configured');
+
+        toast.info('Please confirm the transaction in your Aleo wallet...');
+
+        // Aleo transaction request
+        // For testnetbeta, we specify the program and function or a direct transfer
+        // This is a simplified version of a transfer request
+        const tx = await adapter.requestTransaction({
+          type: 'execution',
+          programId: 'credits.aleo',
+          functionName: 'transfer_public',
+          inputs: [treasury, (depositAmount * 1000000).toString() + 'u64'],
+          fee: 10000 // min fee
+        } as any);
+
+        txHash = tx || 'aleo_tx_' + Date.now();
       } else {
         // BNB (EVM via Privy)
         if (!authenticated) throw new Error('Not authenticated with Privy');
@@ -286,6 +309,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({
             {currencySymbol === 'BYNOMO' ? <img src="/overflowlogo.png" alt="BYNOMO" className="w-5 h-5" /> : (network === 'SOL' && <img src="/logos/solana-sol-logo.png" alt="SOL" className="w-5 h-5" />)}
             {network === 'XLM' && <img src="/logos/stellar-xlm-logo.png" alt="XLM" className="w-5 h-5" />}
             {network === 'NEAR' && <img src="/logos/near-logo.svg" alt="NEAR" className="w-5 h-5" />}
+            {network === 'ALEO' && <img src="/logos/aleo-logo.png" alt="ALEO" className="w-5 h-5" />}
             {walletBalance.toFixed(4)} {currencySymbol}
           </p>
         </div>

@@ -45,7 +45,8 @@ export const createHistorySlice: StateCreator<HistoryState> = (set, get) => ({
 
       // Try fetching from Supabase first
       try {
-        const res = await fetch(`/api/bets/history?wallet=${encodeURIComponent(playerAddress)}&limit=50`);
+        const network = 'ALEO'; // Specifically for Aleo as requested
+        const res = await fetch(`/api/bets/history?wallet=${encodeURIComponent(playerAddress)}&network=${network}&limit=50`);
         if (res.ok) {
           const { bets: serverBets } = await res.json();
           if (serverBets && serverBets.length > 0) {

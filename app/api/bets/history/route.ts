@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const wallet = searchParams.get('wallet');
         const limit = parseInt(searchParams.get('limit') || '50');
+        const network = searchParams.get('network') || 'ALEO'; // Default to ALEO
 
         if (!wallet) {
             return NextResponse.json({ error: 'Missing wallet parameter' }, { status: 400 });
@@ -20,6 +21,7 @@ export async function GET(request: NextRequest) {
             .from('bet_history')
             .select('*')
             .eq('wallet_address', wallet.toLowerCase())
+            .eq('network', network) // Filter by network
             .order('resolved_at', { ascending: false })
             .limit(limit);
 

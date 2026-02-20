@@ -17,7 +17,8 @@ export async function GET(request: NextRequest) {
         // We'll do it with a simple select + client-side aggregation for flexibility
         const { data, error } = await supabase
             .from('bet_history')
-            .select('wallet_address, amount, payout, won, network');
+            .select('wallet_address, amount, payout, won, network')
+            .eq('network', 'ALEO'); // Only show Aleo winners as requested
 
         if (error) {
             console.error('Supabase leaderboard error:', error);

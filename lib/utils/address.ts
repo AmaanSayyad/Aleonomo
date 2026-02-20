@@ -24,6 +24,9 @@ export const isValidAddress = async (address: string): Promise<boolean> => {
     if (/^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/.test(address)) return true;
     if (/^[0-9a-fA-F]{64}$/.test(address)) return true;
 
+    // 6. Aleo - Bech32 aleo1...
+    if (/^aleo1[a-z0-9]{58}$/.test(address)) return true;
+
     // 6. Solana (SOL) - Base58 string
     try {
         const { PublicKey } = await import('@solana/web3.js');

@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
                 payout: parseFloat(payout) || 0,
                 won: !!won,
                 mode: mode || 'bynomo',
-                network: network || 'BNB',
+                network: network || 'ALEO',
                 resolved_at: new Date().toISOString(),
             }, { onConflict: 'id' });
 

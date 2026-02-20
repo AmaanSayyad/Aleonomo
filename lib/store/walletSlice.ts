@@ -14,8 +14,8 @@ export interface WalletState {
   walletBalance: number;
   isConnected: boolean;
   isConnecting: boolean;
-  network: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | null;
-  preferredNetwork: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | null;
+  network: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | 'ALEO' | null;
+  preferredNetwork: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | 'ALEO' | null;
   selectedCurrency: string | null;
   error: string | null;
   isConnectModalOpen: boolean;
@@ -30,8 +30,8 @@ export interface WalletState {
   // Setters for wallet integration
   setAddress: (address: string | null) => void;
   setIsConnected: (connected: boolean) => void;
-  setNetwork: (network: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | null) => void;
-  setPreferredNetwork: (network: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | null) => void;
+  setNetwork: (network: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | 'ALEO' | null) => void;
+  setPreferredNetwork: (network: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | 'ALEO' | null) => void;
   setSelectedCurrency: (currency: string | null) => void;
 }
 
@@ -46,7 +46,7 @@ export const createWalletSlice: StateCreator<WalletState> = (set, get) => ({
   isConnected: false,
   isConnecting: false,
   network: null,
-  preferredNetwork: typeof window !== 'undefined' ? localStorage.getItem('solnomo_preferred_network') as 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | null : null,
+  preferredNetwork: typeof window !== 'undefined' ? (localStorage.getItem('solnomo_preferred_network') as 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | 'ALEO' | null) || 'ALEO' : 'ALEO',
   selectedCurrency: null,
   error: null,
   isConnectModalOpen: false,
@@ -136,6 +136,10 @@ export const createWalletSlice: StateCreator<WalletState> = (set, get) => ({
         const { getNearBalance } = await import('@/lib/near/wallet');
         const bal = await getNearBalance(address);
         set({ walletBalance: bal });
+      } else if (network === 'ALEO') {
+        const { getAleoBalance } = await import('@/lib/aleo/wallet');
+        const bal = await getAleoBalance(address);
+        set({ walletBalance: bal });
       }
     } catch (error) {
       console.error("Error refreshing wallet balance:", error);
@@ -173,14 +177,14 @@ export const createWalletSlice: StateCreator<WalletState> = (set, get) => ({
   /**
    * Set active network (BNB, SOL, SUI, XLM, XTZ or NEAR)
    */
-  setNetwork: (network: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | null) => {
+  setNetwork: (network: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | 'ALEO' | null) => {
     set({ network });
   },
 
   /**
    * Set preferred network (manually chosen by user)
    */
-  setPreferredNetwork: (network: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | null) => {
+  setPreferredNetwork: (network: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | 'ALEO' | null) => {
     set({ preferredNetwork: network });
     if (typeof window !== 'undefined') {
       if (network) {

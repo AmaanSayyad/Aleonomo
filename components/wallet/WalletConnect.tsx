@@ -22,7 +22,7 @@ export const WalletConnect: React.FC = () => {
     else if (network === 'XLM') {
       import('@/lib/stellar/wallet-kit').then(m => m.disconnectWallet());
     }
-    // XTZ and NEAR don't need special SDK disconnect
+    // XTZ, NEAR and ALEO don't need special SDK disconnect
 
     // Explicitly reset our store state and preference
     disconnectStore();
@@ -37,7 +37,8 @@ export const WalletConnect: React.FC = () => {
       case 'XLM': return '/logos/stellar-xlm-logo.png';
       case 'XTZ': return '/logos/tezos-xtz-logo.png';
       case 'NEAR': return '/logos/near-logo.svg';
-      default: return '/logos/bnb-bnb-logo.png';
+      case 'ALEO': return '/logos/aleo-logo.png';
+      default: return '/logos/aleo-logo.png';
     }
   };
 
@@ -49,6 +50,7 @@ export const WalletConnect: React.FC = () => {
       case 'XLM': return 'XLM';
       case 'XTZ': return 'XTZ';
       case 'NEAR': return 'NEAR';
+      case 'ALEO': return 'ALEO';
       default: return 'Connected';
     }
   };

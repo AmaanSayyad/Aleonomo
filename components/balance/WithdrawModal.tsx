@@ -142,6 +142,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
             {currencySymbol === 'BYNOMO' ? <img src="/overflowlogo.png" alt="BYNOMO" className="w-5 h-5" /> : (network === 'SOL' && <img src="/logos/solana-sol-logo.png" alt="SOL" className="w-5 h-5" />)}
             {network === 'XLM' && <img src="/logos/stellar-xlm-logo.png" alt="XLM" className="w-5 h-5" />}
             {network === 'NEAR' && <img src="/logos/near-logo.svg" alt="NEAR" className="w-5 h-5" />}
+            {network === 'ALEO' && <img src="/logos/aleo-logo.png" alt="ALEO" className="w-5 h-5" />}
             {houseBalance.toFixed(4)} {currencySymbol}
           </p>
         </div>

@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
     let isXLM = false;
     let isXTZ = false;
     let isNEAR = false;
+    let isALEO = false;
 
     if (!isBNB) {
       if (/^0x[0-9a-fA-F]{64}$/.test(userAddress)) {
@@ -49,6 +50,8 @@ export async function POST(request: NextRequest) {
       } else if (/^[0-9a-fA-F]{64}$/.test(userAddress) || /^(([a-z\d]+[-_])*[a-z\d]+\.)+[a-z\d]+$/.test(userAddress)) {
         // NEAR: implicit account (64 hex chars) OR named account (e.g., user.near, user.testnet)
         isNEAR = true;
+      } else if (/^aleo1[a-z0-9]{58}$/.test(userAddress)) {
+        isALEO = true;
       } else {
         // Must be Solana if isValidAddress passed
         isSOL = true;
@@ -119,6 +122,9 @@ export async function POST(request: NextRequest) {
       } else if (isNEAR) {
         const { transferNEARFromTreasury } = await import('@/lib/near/backend-client');
         signature = await transferNEARFromTreasury(userAddress, netWithdrawAmount);
+      } else if (isALEO) {
+        const { transferALEOFromTreasury } = await import('@/lib/aleo/backend-client');
+        signature = await transferALEOFromTreasury(userAddress, netWithdrawAmount);
       } else {
         throw new Error('Unsupported network for withdrawal');
       }
