@@ -57,15 +57,33 @@ export const BalanceDisplay: React.FC = () => {
 
   /**
    * Handle refresh button click
-   * Fetches the latest balance from the API
+   * Fetches the latest balance from the API and wallet
    */
   const handleRefresh = async () => {
     if (!address || isLoading) return;
 
     setIsRefreshing(true);
     try {
-      await fetchBalance(address);
-      toast.success('Balance refreshed');
+      // Refresh both house balance and wallet balance
+      const results = await Promise.allSettled([
+        fetchBalance(address),
+        useOverflowStore.getState().refreshWalletBalance?.()
+      ]);
+      
+      // Check results
+      const houseBalanceResult = results[0];
+      const walletBalanceResult = results[1];
+      
+      const houseBalanceSuccess = houseBalanceResult.status === 'fulfilled';
+      const walletBalanceSuccess = walletBalanceResult.status === 'fulfilled';
+      
+      if (houseBalanceSuccess || walletBalanceSuccess) {
+        toast.success('Balance refreshed');
+      } else {
+        // Both failed
+        console.error('All refresh attempts failed');
+        toast.error('Could not refresh balance. Please try again.');
+      }
     } catch (error) {
       console.error('Error refreshing balance:', error);
       toast.error('Failed to refresh balance');
@@ -142,36 +160,6 @@ export const BalanceDisplay: React.FC = () => {
             </h3>
 
             <div className="flex items-center gap-2">
-              {/* Solana Currency Toggle */}
-              {network === 'SOL' && accountType === 'real' && (
-                <div className="flex bg-white/5 rounded-lg p-0.5 border border-white/10">
-                  <button
-                    onClick={() => {
-                      setSelectedCurrency('SOL');
-                      setTimeout(() => fetchBalance(address!), 100);
-                    }}
-                    className={`px-2 py-0.5 rounded text-[8px] font-black uppercase transition-all ${(!selectedCurrency || selectedCurrency === 'SOL')
-                      ? 'bg-purple-500 text-white shadow-lg'
-                      : 'text-white/40 hover:text-white/60'
-                      }`}
-                  >
-                    SOL
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedCurrency('BYNOMO');
-                      setTimeout(() => fetchBalance(address!), 100);
-                    }}
-                    className={`px-2 py-0.5 rounded text-[8px] font-black uppercase transition-all ${selectedCurrency === 'BYNOMO'
-                      ? 'bg-purple-500 text-white shadow-lg'
-                      : 'text-white/40 hover:text-white/60'
-                      }`}
-                  >
-                    BYNOMO
-                  </button>
-                </div>
-              )}
-
               {/* Refresh Button */}
               {accountType === 'real' && (
                 <button
@@ -217,14 +205,13 @@ export const BalanceDisplay: React.FC = () => {
                 <div className="flex items-center gap-1">
                   <img
                     src={
-                      currentSymbol === 'BYNOMO' ? '/overflowlogo.png' :
-                        network === 'SUI' ? '/logos/sui-logo.png' :
-                          network === 'SOL' ? '/logos/solana-sol-logo.png' :
-                            network === 'XLM' ? '/logos/stellar-xlm-logo.png' :
-                              network === 'XTZ' ? '/logos/tezos-xtz-logo.png' :
-                                network === 'NEAR' ? '/logos/near-logo.svg' :
-                                  network === 'ALEO' ? '/logos/aleo-logo.png' :
-                                    '/logos/aleo-logo.png'
+                      network === 'SUI' ? '/logos/sui-logo.png' :
+                        network === 'SOL' ? '/logos/solana-sol-logo.png' :
+                          network === 'XLM' ? '/logos/stellar-xlm-logo.png' :
+                            network === 'XTZ' ? '/logos/tezos-xtz-logo.png' :
+                              network === 'NEAR' ? '/logos/near-logo.svg' :
+                                network === 'ALEO' ? '/aleo.jpeg' :
+                                  '/aleo.jpeg'
                     }
                     alt={currentSymbol}
                     className="w-4 h-4 object-contain"
@@ -299,3 +286,6 @@ export const BalanceDisplay: React.FC = () => {
     </>
   );
 };
+
+// ALEO USD currency toggle added after SOL currency toggle
+

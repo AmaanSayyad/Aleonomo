@@ -37,8 +37,8 @@ export const WalletConnect: React.FC = () => {
       case 'XLM': return '/logos/stellar-xlm-logo.png';
       case 'XTZ': return '/logos/tezos-xtz-logo.png';
       case 'NEAR': return '/logos/near-logo.svg';
-      case 'ALEO': return '/logos/aleo-logo.png';
-      default: return '/logos/aleo-logo.png';
+      case 'ALEO': return '/aleo.jpeg';
+      default: return '/aleo.jpeg';
     }
   };
 

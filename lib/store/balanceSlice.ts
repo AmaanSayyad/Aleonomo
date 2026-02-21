@@ -70,7 +70,16 @@ export const createBalanceSlice: StateCreator<BalanceState> = (set, get) => ({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch balance');
+        const errorMessage = errorData.error || 'Failed to fetch balance';
+        
+        // If it's a temporary service error, don't throw - just log and keep current balance
+        if (errorMessage.includes('temporarily unavailable') || errorMessage.includes('Service')) {
+          console.warn('Balance API temporarily unavailable, keeping current balance');
+          set({ isLoading: false, error: null }); // Clear loading but don't show error
+          return;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -83,10 +92,20 @@ export const createBalanceSlice: StateCreator<BalanceState> = (set, get) => ({
       });
     } catch (error) {
       console.error('Error fetching balance:', error);
-      set({
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch balance'
-      });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch balance';
+      
+      // Check if it's a Supabase/database error
+      if (errorMessage.includes('temporarily unavailable') || errorMessage.includes('Service')) {
+        set({
+          isLoading: false,
+          error: null // Don't show error to user for temporary issues
+        });
+      } else {
+        set({
+          isLoading: false,
+          error: errorMessage
+        });
+      }
     }
   },
 

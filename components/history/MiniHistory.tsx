@@ -9,7 +9,11 @@ export const MiniHistory: React.FC = () => {
     const isIndicatorsOpen = useStore((state) => state.isIndicatorsOpen);
     const setIsIndicatorsOpen = useStore((state) => state.setIsIndicatorsOpen);
     const activeIndicators = useStore((state) => state.activeIndicators);
+    const network = useStore((state) => state.network);
     const [isOpen, setIsOpen] = useState(false);
+
+    // Get currency symbol based on network
+    const currencySymbol = network === 'SUI' ? 'USDC' : network === 'SOL' ? 'SOL' : network === 'XLM' ? 'XLM' : network === 'XTZ' ? 'XTZ' : network === 'NEAR' ? 'NEAR' : network === 'ALEO' ? 'ALEO' : 'BNB';
 
     // Show only last 10 bets
     const recentBets = bets.slice(0, 10);
@@ -56,7 +60,7 @@ export const MiniHistory: React.FC = () => {
                                                         : `-${parseFloat(bet.amount).toFixed(4)}`}
                                                 </span>
                                                 <span className="text-[8px] text-gray-600 uppercase font-black">
-                                                    BNB
+                                                    {currencySymbol}
                                                 </span>
                                             </div>
                                         </div>

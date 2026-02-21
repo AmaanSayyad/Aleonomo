@@ -7,9 +7,10 @@ interface BetCardProps {
   bet: BetRecord;
   isExpanded: boolean;
   onToggle: () => void;
+  currencySymbol?: string;
 }
 
-export const BetCard: React.FC<BetCardProps> = ({ bet, isExpanded, onToggle }) => {
+export const BetCard: React.FC<BetCardProps> = ({ bet, isExpanded, onToggle, currencySymbol = 'BNB' }) => {
   const isSettled = bet.endPrice > 0;
   const isActive = !isSettled;
 
@@ -61,10 +62,10 @@ export const BetCard: React.FC<BetCardProps> = ({ bet, isExpanded, onToggle }) =
         </div>
 
         <div className="text-right">
-          <p className="text-white font-bold">{parseFloat(bet.amount).toFixed(4)} BNB</p>
+          <p className="text-white font-bold">{parseFloat(bet.amount).toFixed(4)} {currencySymbol}</p>
           {isSettled && (
             <p className={`text-sm font-semibold ${bet.won ? 'text-green-400' : 'text-red-400'}`}>
-              {bet.won ? `+${parseFloat(bet.payout).toFixed(4)}` : `-${parseFloat(bet.amount).toFixed(4)}`} BNB
+              {bet.won ? `+${parseFloat(bet.payout).toFixed(4)}` : `-${parseFloat(bet.amount).toFixed(4)}`} {currencySymbol}
             </p>
           )}
           {isActive && (
@@ -124,8 +125,8 @@ export const BetCard: React.FC<BetCardProps> = ({ bet, isExpanded, onToggle }) =
               ${bet.won ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}
             `}>
               {bet.won
-                ? `Won ${parseFloat(bet.payout).toFixed(4)} BNB (${((parseFloat(bet.payout) / parseFloat(bet.amount) - 1) * 100).toFixed(0)}% profit)`
-                : `Lost ${parseFloat(bet.amount).toFixed(4)} BNB`
+                ? `Won ${parseFloat(bet.payout).toFixed(4)} ${currencySymbol} (${((parseFloat(bet.payout) / parseFloat(bet.amount) - 1) * 100).toFixed(0)}% profit)`
+                : `Lost ${parseFloat(bet.amount).toFixed(4)} ${currencySymbol}`
               }
             </div>
           )}

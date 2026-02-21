@@ -18,7 +18,7 @@ export const config = createConfig(
 
         // Optional App Info
         appDescription: 'BYNOMO on BNB Smart Chain',
-        appUrl: 'https://family.co', // your app's url
-        appIcon: 'https://family.co/logo.png', // your app's icon
+        appUrl: 'https://bynomo.fun', // your app's url
+        appIcon: 'https://bynomo.fun/overflowlogo.png', // your app's icon
     }),
 );

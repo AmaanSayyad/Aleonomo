@@ -29,7 +29,8 @@ export const Leaderboard: React.FC = () => {
             case 'XLM': return '/logos/stellar-xlm-logo.png';
             case 'XTZ': return '/logos/tezos-xtz-logo.png';
             case 'NEAR': return '/logos/near-logo.svg';
-            default: return '/logos/bnb-bnb-logo.png';
+            case 'ALEO': return '/aleo.jpeg';
+            default: return '/aleo.jpeg';
         }
     };
 
@@ -41,7 +42,8 @@ export const Leaderboard: React.FC = () => {
             case 'XLM': return 'XLM';
             case 'XTZ': return 'XTZ';
             case 'NEAR': return 'NEAR';
-            default: return 'BNB';
+            case 'ALEO': return 'ALEO';
+            default: return 'ALEO';
         }
     };
 
@@ -128,9 +130,15 @@ export const Leaderboard: React.FC = () => {
                             <div className="flex justify-between items-center mb-3 sm:mb-4">
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm sm:text-lg">🏆</span>
-                                    <h3 className="text-[10px] sm:text-[11px] text-white font-black uppercase tracking-[0.2em]">
-                                        Leaderboard
-                                    </h3>
+                                    <div>
+                                        <h3 className="text-[10px] sm:text-[11px] text-white font-black uppercase tracking-[0.2em]">
+                                            Leaderboard
+                                        </h3>
+                                        <div className="flex items-center gap-1 mt-0.5">
+                                            <img src="/aleo.jpeg" alt="Aleo" className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm" />
+                                            <span className="text-[7px] sm:text-[8px] text-orange-400 font-bold uppercase tracking-wider">Aleo Network</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button

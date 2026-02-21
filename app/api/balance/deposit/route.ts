@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate address (support BNB, Solana, Sui, Stellar and Tezos)
+    // Validate address (support BNB, Solana, Sui, Stellar, Tezos, NEAR and Aleo)
     let isValid = false;
 
     // Check if it's a valid EVM address
@@ -45,6 +45,9 @@ export async function POST(request: NextRequest) {
       isValid = true;
     } else if (/^(tz1|tz2|tz3|KT1)[a-zA-Z0-9]{33}$/.test(userAddress)) {
       // Check if it's a valid Tezos address
+      isValid = true;
+    } else if (/^aleo1[a-z0-9]{58}$/.test(userAddress)) {
+      // Check if it's a valid Aleo address (starts with aleo1, 63 chars total)
       isValid = true;
     } else {
       // Check if it's a valid Solana address
@@ -67,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     if (!isValid) {
       return NextResponse.json(
-        { error: 'Invalid wallet address format (BNB, Solana, Sui, Stellar, Tezos or NEAR required)' },
+        { error: 'Invalid wallet address format (BNB, Solana, Sui, Stellar, Tezos, NEAR or Aleo required)' },
         { status: 400 }
       );
     }

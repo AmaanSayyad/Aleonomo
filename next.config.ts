@@ -6,8 +6,9 @@ const nextConfig: NextConfig = {
     // Ignore TypeScript errors in near-docs folder during build
     ignoreBuildErrors: false,
   },
-  // Empty turbopack config to silence warning
-  turbopack: {},
+  turbopack: {
+    root: process.cwd(),
+  },
 };
 
 export default nextConfig;

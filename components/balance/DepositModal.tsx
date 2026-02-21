@@ -47,8 +47,8 @@ export const DepositModal: React.FC<DepositModalProps> = ({
   const toast = useToast();
 
   const selectedCurrency = useOverflowStore(state => state.selectedCurrency);
-  const currencySymbol = network === 'SUI' ? 'USDC' : network === 'SOL' ? (selectedCurrency || 'SOL') : network === 'XLM' ? 'XLM' : network === 'XTZ' ? 'XTZ' : network === 'NEAR' ? 'NEAR' : 'BNB';
-  const networkName = network === 'SUI' ? 'Sui Network' : network === 'SOL' ? 'Solana' : network === 'XLM' ? 'Stellar' : network === 'XTZ' ? 'Tezos' : network === 'NEAR' ? 'NEAR Protocol' : 'BNB Chain';
+  const currencySymbol = network === 'SUI' ? 'USDC' : network === 'SOL' ? (selectedCurrency || 'SOL') : network === 'XLM' ? 'XLM' : network === 'XTZ' ? 'XTZ' : network === 'NEAR' ? 'NEAR' : network === 'ALEO' ? 'ALEO' : 'BNB';
+  const networkName = network === 'SUI' ? 'Sui Network' : network === 'SOL' ? 'Solana' : network === 'XLM' ? 'Stellar' : network === 'XTZ' ? 'Tezos' : network === 'NEAR' ? 'NEAR Protocol' : network === 'ALEO' ? 'Aleo Network' : 'BNB Chain';
 
   // Quick select amounts
   const quickAmounts = network === 'SUI' ? [1, 5, 10, 25] : [0.1, 0.5, 1, 5];
@@ -136,17 +136,10 @@ export const DepositModal: React.FC<DepositModalProps> = ({
       } else if (network === 'SOL') {
         if (!solanaPublicKey) throw new Error('Solana wallet not connected');
 
-        const { buildDepositTransaction, buildTokenDepositTransaction, getSolanaConnection } = await import('@/lib/solana/client');
+        const { buildDepositTransaction, getSolanaConnection } = await import('@/lib/solana/client');
         const connection = getSolanaConnection();
-        const selectedCurrency = useOverflowStore.getState().selectedCurrency;
 
-        let transaction;
-        if (selectedCurrency === 'BYNOMO') {
-          const BYNOMO_MINT = 'Bi4NEEQhtrFdnoS9NjrXaWkQftXifh2t3RzQHSTQpump';
-          transaction = await buildTokenDepositTransaction(depositAmount, address, BYNOMO_MINT);
-        } else {
-          transaction = await buildDepositTransaction(depositAmount, address);
-        }
+        const transaction = await buildDepositTransaction(depositAmount, address);
 
         toast.info('Please confirm the transaction in your Solana wallet...');
 
@@ -229,18 +222,108 @@ export const DepositModal: React.FC<DepositModalProps> = ({
 
         toast.info('Please confirm the transaction in your Aleo wallet...');
 
-        // Aleo transaction request
-        // For testnetbeta, we specify the program and function or a direct transfer
-        // This is a simplified version of a transfer request
-        const tx = await adapter.requestTransaction({
-          type: 'execution',
-          programId: 'credits.aleo',
-          functionName: 'transfer_public',
-          inputs: [treasury, (depositAmount * 1000000).toString() + 'u64'],
-          fee: 10000 // min fee
-        } as any);
+        // Aleo uses microcredits (1 ALEO = 1,000,000 microcredits)
+        const amountInMicrocredits = Math.floor(depositAmount * 1_000_000);
 
-        txHash = tx || 'aleo_tx_' + Date.now();
+        // Create AleoTransaction object using Transaction.createTransaction
+        const { Transaction, WalletAdapterNetwork } = await import('@demox-labs/aleo-wallet-adapter-base');
+        
+        console.log('[Aleo Deposit] Creating transaction...');
+        console.log('[Aleo Deposit] From:', adapter.publicKey);
+        console.log('[Aleo Deposit] To:', treasury);
+        console.log('[Aleo Deposit] Amount:', `${amountInMicrocredits}u64`);
+        console.log('[Aleo Deposit] Fee: 0.5 ALEO (500000 microcredits)');
+        console.log('[Aleo Deposit] Network: TestnetBeta (matching Leo Wallet)');
+
+        // Use TestnetBeta to match Leo Wallet's network
+        const aleoTransaction = Transaction.createTransaction(
+          adapter.publicKey,
+          WalletAdapterNetwork.TestnetBeta,
+          'credits.aleo',
+          'transfer_public',
+          [treasury, `${amountInMicrocredits}u64`],
+          500000, // 0.5 ALEO fee in microcredits
+        );
+        
+        // IMPORTANT: Fix chainId mismatch
+        // WalletAdapterNetwork.TestnetBeta creates chainId "testnet3" but Leo Wallet expects "testnetbeta"
+        // Manually override the chainId to match Leo Wallet's network
+        (aleoTransaction as any).chainId = 'testnetbeta';
+        
+        // CRITICAL: Set feePrivate to false to use public balance for fee
+        // User has public balance but no private records
+        (aleoTransaction as any).feePrivate = false;
+
+        console.log('[Aleo Deposit] Transaction object:', aleoTransaction);
+        console.log('[Aleo Deposit] Transaction type:', typeof aleoTransaction);
+        console.log('[Aleo Deposit] Transaction keys:', Object.keys(aleoTransaction));
+        console.log('[Aleo Deposit] Transaction details:', JSON.stringify(aleoTransaction, null, 2));
+        
+        // Check Leo Wallet directly
+        if (typeof window !== 'undefined' && (window as any).leo) {
+          const leoWallet = (window as any).leo;
+          console.log('[Aleo Deposit] Leo Wallet available methods:', Object.keys(leoWallet));
+          console.log('[Aleo Deposit] requestExecution type:', typeof leoWallet.requestExecution);
+          console.log('[Aleo Deposit] requestTransaction type:', typeof leoWallet.requestTransaction);
+        }
+
+        // Try using requestTransaction instead of requestExecution
+        // Leo Wallet might not support requestExecution or expects different format
+        console.log('[Aleo Deposit] Trying requestTransaction...');
+        console.log('[Aleo Deposit] Adapter connected:', adapter.connected);
+        console.log('[Aleo Deposit] Adapter publicKey:', adapter.publicKey);
+        
+        try {
+          // Check if Leo Wallet popup is blocked
+          console.log('[Aleo Deposit] Requesting transaction from Leo Wallet...');
+          console.log('[Aleo Deposit] Please approve the transaction in Leo Wallet popup!');
+          
+          const result = await adapter.requestTransaction(aleoTransaction);
+          console.log('[Aleo Deposit] Transaction result:', result);
+          console.log('[Aleo Deposit] Result type:', typeof result);
+          
+          // Handle both string result (ID) and object result ({ transactionId: ID })
+          txHash = typeof result === 'string' ? result : (result?.transactionId || result?.id);
+
+          if (!txHash) {
+            console.error('[Aleo Deposit] No transaction ID in result:', result);
+            throw new Error('Transaction failed - no transaction ID returned');
+          }
+
+          console.log('[Aleo Deposit] Transaction hash:', txHash);
+        } catch (txError: any) {
+          console.error('[Aleo Deposit] requestTransaction failed!');
+          console.error('[Aleo Deposit] Error type:', typeof txError);
+          console.error('[Aleo Deposit] Error constructor:', txError.constructor.name);
+          console.error('[Aleo Deposit] Error details:', {
+            message: txError.message,
+            name: txError.name,
+            code: txError.code,
+            stack: txError.stack
+          });
+          
+          // Try to extract more info from the error
+          if (txError.error) {
+            console.error('[Aleo Deposit] Nested error:', txError.error);
+          }
+          
+          // Check if user rejected the transaction
+          if (txError.message && (
+            txError.message.includes('User rejected') ||
+            txError.message.includes('User denied') ||
+            txError.message.includes('rejected') ||
+            txError.message.includes('denied')
+          )) {
+            throw new Error('Transaction cancelled by user');
+          }
+          
+          // Check if it's a network issue
+          if (txError.message && txError.message.includes('network')) {
+            throw new Error('Network error. Please check your connection and Leo Wallet network settings.');
+          }
+          
+          throw new Error(`Leo Wallet transaction failed: ${txError.message || 'Unknown error'}. Please check console for details.`);
+        }
       } else {
         // BNB (EVM via Privy)
         if (!authenticated) throw new Error('Not authenticated with Privy');
@@ -306,10 +389,10 @@ export const DepositModal: React.FC<DepositModalProps> = ({
             {network === 'SUI' && <img src="/usd-coin-usdc-logo.png" alt="USDC" className="w-5 h-5" />}
             {network === 'XTZ' && <img src="/logos/tezos-xtz-logo.png" alt="XTZ" className="w-5 h-5" />}
             {network === 'BNB' && <img src="/logos/bnb-bnb-logo.png" alt="BNB" className="w-5 h-5" />}
-            {currencySymbol === 'BYNOMO' ? <img src="/overflowlogo.png" alt="BYNOMO" className="w-5 h-5" /> : (network === 'SOL' && <img src="/logos/solana-sol-logo.png" alt="SOL" className="w-5 h-5" />)}
+            {network === 'SOL' && <img src="/logos/solana-sol-logo.png" alt="SOL" className="w-5 h-5" />}
             {network === 'XLM' && <img src="/logos/stellar-xlm-logo.png" alt="XLM" className="w-5 h-5" />}
             {network === 'NEAR' && <img src="/logos/near-logo.svg" alt="NEAR" className="w-5 h-5" />}
-            {network === 'ALEO' && <img src="/logos/aleo-logo.png" alt="ALEO" className="w-5 h-5" />}
+            {network === 'ALEO' && <img src="/aleo.jpeg" alt="ALEO" className="w-5 h-5" />}
             {walletBalance.toFixed(4)} {currencySymbol}
           </p>
         </div>

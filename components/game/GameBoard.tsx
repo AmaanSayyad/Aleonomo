@@ -70,7 +70,7 @@ export const GameBoard: React.FC = () => {
   const [accessError, setAccessError] = useState<string | null>(null);
 
   // Unified balance and currency
-  const currencySymbol = network === 'SOL' ? (selectedCurrency || 'SOL') : network === 'SUI' ? 'USDC' : network === 'XLM' ? 'XLM' : network === 'XTZ' ? 'XTZ' : network === 'NEAR' ? 'NEAR' : 'BNB';
+  const currencySymbol = network === 'SOL' ? (selectedCurrency || 'SOL') : network === 'SUI' ? 'USDC' : network === 'XLM' ? 'XLM' : network === 'XTZ' ? 'XTZ' : network === 'NEAR' ? 'NEAR' : network === 'ALEO' ? 'ALEO' : 'BNB';
   const blitzEntryFee = 0.01;
 
   // Connection and Authorization status
@@ -90,6 +90,7 @@ export const GameBoard: React.FC = () => {
 
     try {
       setIsActivatingBlitz(true);
+      let txHash: string | null = null;
 
       if (network === 'SOL') {
         const { getSolanaConnection, buildDepositTransaction } = await import('@/lib/solana/client');
@@ -185,6 +186,40 @@ export const GameBoard: React.FC = () => {
         toast.info(`Confirming ${blitzEntryFee} NEAR Blitz Entry...`);
         const txHash = await depositNEAR(blitzEntryFee.toString());
         console.log("NEAR Blitz payment hash:", txHash);
+      } else if (network === 'ALEO') {
+        const { getAleoAdapter } = await import('@/lib/aleo/wallet');
+        const { Transaction, WalletAdapterNetwork } = await import('@demox-labs/aleo-wallet-adapter-base');
+        const adapter = getAleoAdapter();
+        if (!adapter) throw new Error('Aleo adapter not initialized');
+
+        const treasury = process.env.NEXT_PUBLIC_ALEO_TREASURY_ADDRESS;
+        if (!treasury) throw new Error('Aleo treasury address not configured');
+
+        const amountInMicrocredits = Math.floor(blitzEntryFee * 1_000_000);
+
+        // Create transaction using Transaction class
+        const aleoTransaction = Transaction.createTransaction(
+          address,
+          WalletAdapterNetwork.TestnetBeta,
+          'credits.aleo',
+          'transfer_public',
+          [treasury, `${amountInMicrocredits}u64`],
+          500000 // 0.5 ALEO fee
+        );
+
+        // Override chainId to match Leo Wallet's network
+        aleoTransaction.chainId = 'testnetbeta';
+        
+        // Use public balance for fee payment
+        (aleoTransaction as any).feePrivate = false;
+
+        toast.info(`Confirming ${blitzEntryFee} ALEO Blitz Entry...`);
+        const result = await adapter.requestTransaction(aleoTransaction);
+        const blitzTxId = typeof result === 'string' ? result : (result?.transactionId || result?.id);
+        console.log("Aleo Blitz payment hash:", blitzTxId);
+
+        if (!blitzTxId) throw new Error('Transaction failed - no transaction ID returned');
+        txHash = blitzTxId;
       }
 
       toast.success("Payment successful! Blitz Mode enabled.");
@@ -640,7 +675,7 @@ export const GameBoard: React.FC = () => {
                           <p className="text-gray-400 text-[10px] uppercase tracking-widest">Wallet Balance</p>
                           {network === 'SOL' && (
                             <div className="flex gap-1 bg-black/40 p-0.5 rounded-lg border border-white/5">
-                              {['SOL', 'BYNOMO'].map(c => (
+                              {['SOL'].map(c => (
                                 <button
                                   key={c}
                                   onClick={() => setSelectedCurrency(c)}

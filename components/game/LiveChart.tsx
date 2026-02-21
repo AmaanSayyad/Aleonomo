@@ -175,7 +175,7 @@ export const LiveChart: React.FC<LiveChartProps> = ({ betAmount, setBetAmount })
 
   // Asset display configuration
   const assetConfig: Record<AssetType, { name: string; symbol: string; pair: string; decimals: number; logo: string; category: 'Crypto' | 'Metals' | 'Forex' | 'Stocks' }> = {
-    BYNOMO: { name: 'Bynomo Token', symbol: 'BYNOMO', pair: 'BYNOMO/USD', decimals: 6, logo: '/overflowlogo.png', category: 'Crypto' },
+    ALEO: { name: 'Aleo USD', symbol: 'ALEO', pair: 'ALEO/USD', decimals: 6, logo: '/aleo.jpeg', category: 'Crypto' },
     BTC: { name: 'Bitcoin', symbol: 'BTC', pair: 'BTC/USD', decimals: 2, logo: '/logos/bitcoin-btc-logo.png', category: 'Crypto' },
     ETH: { name: 'Ethereum', symbol: 'ETH', pair: 'ETH/USD', decimals: 2, logo: '/logos/ethereum-eth-logo.png', category: 'Crypto' },
     SOL: { name: 'Solana', symbol: 'SOL', pair: 'SOL/USD', decimals: 2, logo: '/logos/solana-sol-logo.png', category: 'Crypto' },
@@ -310,7 +310,8 @@ export const LiveChart: React.FC<LiveChartProps> = ({ betAmount, setBetAmount })
             selectedAsset === 'BTC' ? 0.0015 :
               selectedAsset === 'ETH' ? 0.0018 :
                 selectedAsset === 'SOL' ? 0.0025 :
-                  0.0020 // Default
+                  selectedAsset === 'ALEO' ? 0.0040 : // Aleo: Wider range for less visual volatility
+                    0.0020 // Default
     );
 
     const mobileZoomFactor = isMobile ? 5.0 : 1.0;

@@ -24,7 +24,7 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const currency = searchParams.get('currency') || 'BNB';
 
-    // Validate address (support BNB, Solana, Sui, Stellar and Tezos)
+    // Validate address (support BNB, Solana, Sui, Stellar, Tezos, NEAR and Aleo)
     let isValid = false;
 
     // Check if it's a valid EVM address (BNB)
@@ -35,6 +35,9 @@ export async function GET(
       isValid = true;
     } else if (/^(tz1|tz2|tz3|KT1)[a-zA-Z0-9]{33}$/.test(address)) {
       // Check if it's a valid Tezos address
+      isValid = true;
+    } else if (/^aleo1[a-z0-9]{58}$/.test(address)) {
+      // Check if it's a valid Aleo address
       isValid = true;
     } else {
       // Check if it's a valid Solana address
@@ -57,7 +60,7 @@ export async function GET(
 
     if (!isValid) {
       return NextResponse.json(
-        { error: 'Invalid wallet address format (BNB, Solana, Sui, Stellar, Tezos or NEAR required)' },
+        { error: 'Invalid wallet address format (BNB, Solana, Sui, Stellar, Tezos, NEAR or Aleo required)' },
         { status: 400 }
       );
     }
@@ -73,6 +76,7 @@ export async function GET(
     // Handle database errors
     if (error) {
       if (error.code === 'PGRST116') {
+        // User not found - return 0 balance
         return NextResponse.json({
           balance: 0,
           updatedAt: null,
@@ -81,6 +85,17 @@ export async function GET(
       }
 
       console.error('Database error fetching balance:', error);
+      
+      // If Supabase is not configured, return 0 balance instead of error
+      if (error.message && (error.message.includes('fetch') || error.message.includes('network'))) {
+        console.warn('Supabase connection issue - returning 0 balance');
+        return NextResponse.json({
+          balance: 0,
+          updatedAt: null,
+          tier: 'free'
+        });
+      }
+      
       return NextResponse.json(
         { error: 'Service temporarily unavailable. Please try again.' },
         { status: 503 }

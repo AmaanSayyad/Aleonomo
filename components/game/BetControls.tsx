@@ -35,22 +35,20 @@ export const BetControls: React.FC<BetControlsProps> = ({
 
   const currencySymbol = useMemo(() => {
     switch (network) {
+      case 'ALEO': return 'ALEO';
       case 'XTZ': return 'XTZ';
+      case 'XLM': return 'XLM';
       case 'NEAR': return 'NEAR';
       case 'SUI': return 'USDC';
-      case 'ALEO': return 'ALEO';
       case 'SOL': {
         const state = useStore.getState() as any;
         return state.selectedCurrency || 'SOL';
       }
-      default: return 'ALEO';
+      default: return 'BNB';
     }
   }, [network]);
 
   const currencyLogo = useMemo(() => {
-    if (network === 'SOL' && currencySymbol === 'BYNOMO') {
-      return '/overflowlogo.png';
-    }
     switch (network) {
       case 'SUI': return '/logos/usdc.png';
       case 'SOL': return '/logos/solana-sol-logo.png';
@@ -58,8 +56,8 @@ export const BetControls: React.FC<BetControlsProps> = ({
       case 'NEAR': return '/logos/near-logo.svg';
       case 'XTZ': return '/logos/tezos-xtz-logo.png';
       case 'XLM': return '/logos/stellar-xlm-logo.png';
-      case 'ALEO': return '/logos/aleo-logo.png';
-      default: return '/logos/aleo-logo.png';
+      case 'ALEO': return '/aleo.jpeg';
+      default: return '/aleo.jpeg';
     }
   }, [network, currencySymbol]);
 

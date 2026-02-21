@@ -1,7 +1,7 @@
 /**
  * Pyth Network Price Feed Service
  * Fetches real-time crypto price data from Pyth Network
- * Supports: BTC, SUI, SOL, AND CUSTOM TOKENS (BYNOMO)
+ * Supports: BTC, SUI, SOL, ALEO, AND CORE ASSETS
  */
 
 import { HermesClient } from '@pythnetwork/hermes-client';
@@ -42,7 +42,7 @@ export const PRICE_FEED_IDS = {
 } as const;
 
 export const CUSTOM_TOKENS = {
-  BYNOMO: 'Bi4NEEQhtrFdnoS9NjrXaWkQftXifh2t3RzQHSTQpump'
+  ALEO: 'aleo' // CoinGecko ID
 } as const;
 
 export type AssetType = keyof typeof PRICE_FEED_IDS | keyof typeof CUSTOM_TOKENS;
@@ -74,23 +74,36 @@ export class PythPriceFeed {
    */
   async fetchPrice(): Promise<PriceData> {
     try {
-      if (this.asset === 'BYNOMO') {
-        const response = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${CUSTOM_TOKENS.BYNOMO}`, {
-          signal: AbortSignal.timeout(5000)
-        });
-        if (!response.ok) throw new Error('DexScreener API error');
-        const data = await response.json();
-        if (data.pairs && data.pairs.length > 0) {
-          const priceUsd = parseFloat(data.pairs[0].priceUsd);
-          this.lastPrice = priceUsd;
+      if (this.asset === 'ALEO') {
+        // Fetch Aleo price from server-side API route
+        try {
+          const response = await fetch('/api/price/aleo', {
+            signal: AbortSignal.timeout(7000)
+          });
+          if (!response.ok) throw new Error('ALEO price API error');
+          const data = await response.json();
+          if (data.price) {
+            const priceUsd = data.price;
+            this.lastPrice = priceUsd;
+            return {
+              price: priceUsd,
+              confidence: 0,
+              timestamp: Date.now() / 1000,
+              expo: -8
+            };
+          }
+        } catch (error) {
+          console.warn('ALEO price fetch failed, using cached/fallback price');
+          // Use last known price or stable fallback
+          const fallbackPrice = this.lastPrice || 0.50;
           return {
-            price: priceUsd,
+            price: fallbackPrice,
             confidence: 0,
             timestamp: Date.now() / 1000,
             expo: -8
           };
         }
-        throw new Error('No pairs found for BYNOMO');
+        throw new Error('No price data for ALEO');
       }
 
       // Default Pyth logic
@@ -185,20 +198,29 @@ export class PythPriceFeed {
         }
       }
 
-      // 2. BYNOMO (DexScreener)
+      // 2. ALEO (via server-side API with stable fallback)
       try {
-        const bynomoRes = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${CUSTOM_TOKENS.BYNOMO}`, {
-          signal: AbortSignal.timeout(5000) // 5s timeout
+        const aleoRes = await fetch('/api/price/aleo', {
+          signal: AbortSignal.timeout(7000)
         });
-        if (bynomoRes.ok) {
-          const data = await bynomoRes.json();
-          if (data.pairs && data.pairs.length > 0) {
-            results.BYNOMO = parseFloat(data.pairs[0].priceUsd);
+        if (aleoRes.ok) {
+          const data = await aleoRes.json();
+          if (data.price && typeof data.price === 'number' && data.price > 0) {
+            results.ALEO = data.price;
+          } else {
+            // Use stable fallback if invalid price
+            results.ALEO = 0.50;
           }
+        } else {
+          // Fallback to stable price if API fails
+          results.ALEO = 0.50;
         }
       } catch (tokenErr) {
-        // Quietly fail for custom tokens to avoid console spam
+        // Use stable fallback price on error (timeout, network error, etc.)
+        results.ALEO = 0.50;
       }
+
+      // 3. ALEO (CoinGecko)
     } catch (err) {
       console.error('Error in fetchAllPrices:', err);
     }
@@ -245,7 +267,7 @@ export class MockPriceFeed {
 
   constructor(asset: AssetType = 'BTC', basePrice?: number, volatility: number = 0.001, trend: number = 0) {
     this.asset = asset;
-    const defaults: Record<string, number> = { BTC: 50000, BNB: 600, BYNOMO: 0.1 };
+    const defaults: Record<string, number> = { BTC: 50000, BNB: 600, ALEO: 0.5 };
     this.basePrice = basePrice || defaults[asset] || 1;
     this.volatility = volatility;
     this.trend = trend;
@@ -253,7 +275,7 @@ export class MockPriceFeed {
 
   setAsset(asset: AssetType): void {
     this.asset = asset;
-    const defaults: Record<string, number> = { BTC: 50000, BNB: 600, BYNOMO: 0.1 };
+    const defaults: Record<string, number> = { BTC: 50000, BNB: 600, ALEO: 0.5 };
     this.basePrice = defaults[asset] || 1;
   }
 

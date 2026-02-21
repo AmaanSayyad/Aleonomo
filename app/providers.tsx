@@ -154,7 +154,14 @@ function WalletSync() {
       }
     }
 
-    // 7. Cleanup/Sync Decision
+    // 7. Check ALEO
+    if (preferredNetwork === 'ALEO') {
+      if (useOverflowStore.getState().address && useOverflowStore.getState().network === 'ALEO') {
+        return;
+      }
+    }
+
+    // 8. Cleanup/Sync Decision
     const state = useOverflowStore.getState();
     const isDemoMode = state.accountType === 'demo';
     const hasSolana = solanaConnected && solanaPublicKey;

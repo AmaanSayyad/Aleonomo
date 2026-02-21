@@ -13,7 +13,7 @@ const steps = [
     {
         id: "01",
         title: "Hybrid Custody",
-        desc: "Solana-speed performance with non-custodial security. BYNOMO connects your wallet to a high-speed house balance for instant execution without gas lag."
+        desc: "Solana-speed performance with non-custodial security. ALEONOMO connects your wallet to a high-speed house balance for instant execution without gas lag."
     },
     {
         id: "02",
@@ -36,7 +36,7 @@ const testimonials = [
     {
         name: "Astra Vance",
         role: "Venture Strategist",
-        content: "The Blitz Rounds are a game-changer. The millisecond precision from Pyth Oracles makes BYNOMO feel like a professional CEX but with decentralized peace of mind.",
+        content: "The Blitz Rounds are a game-changer. The millisecond precision from Pyth Oracles makes ALEONOMO feel like a professional CEX but with decentralized peace of mind.",
         avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"
     },
     {
@@ -186,9 +186,9 @@ export default function WaitlistPage() {
                                     }
                                 }
                             }}
-                            className="flex"
+                            className="flex flex-wrap"
                         >
-                            {Array.from("BYNOMO").map((letter, index) => (
+                            {Array.from("ALEONOMO").map((letter, index) => (
                                 <motion.h1
                                     key={index}
                                     variants={{
@@ -204,7 +204,7 @@ export default function WaitlistPage() {
                                             }
                                         }
                                     }}
-                                    className="text-[12vw] lg:text-[10rem] font-black leading-[0.8] tracking-tighter text-white"
+                                    className="text-[9vw] lg:text-[7.5rem] font-black leading-[0.8] tracking-tighter text-white"
                                     style={{ fontFamily: 'var(--font-orbitron)' }}
                                 >
                                     {letter}
@@ -393,7 +393,7 @@ export default function WaitlistPage() {
 
             {/* FOOTER SECTION */}
             <footer className="py-24 px-10 border-t border-white/5 bg-black relative z-10 w-full overflow-hidden">
-                <div className="huge-footer-logo">BYNOMO</div>
+                <div className="huge-footer-logo">ALEONOMO</div>
 
                 <div className="footer-meta">
                     <div className="footer-meta-item">2026 © All rights reserved</div>

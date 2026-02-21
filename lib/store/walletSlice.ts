@@ -109,16 +109,8 @@ export const createWalletSlice: StateCreator<WalletState> = (set, get) => ({
         const bal = await getBNBBalance(address);
         set({ walletBalance: bal });
       } else if (network === 'SOL') {
-        const { getSOLBalance, getTokenBalance } = await import('@/lib/solana/client');
-        const currency = get().selectedCurrency || 'SOL';
-        let bal = 0;
-        if (currency === 'SOL') {
-          bal = await getSOLBalance(address);
-        } else if (currency === 'BYNOMO') {
-          // BYNOMO Token on Solana
-          const BYNOMO_MINT = 'Bi4NEEQhtrFdnoS9NjrXaWkQftXifh2t3RzQHSTQpump';
-          bal = await getTokenBalance(address, BYNOMO_MINT);
-        }
+        const { getSOLBalance } = await import('@/lib/solana/client');
+        const bal = await getSOLBalance(address);
         set({ walletBalance: bal });
       } else if (network === 'SUI') {
         const { getUSDCBalance } = await import('@/lib/sui/client');
@@ -137,8 +129,16 @@ export const createWalletSlice: StateCreator<WalletState> = (set, get) => ({
         const bal = await getNearBalance(address);
         set({ walletBalance: bal });
       } else if (network === 'ALEO') {
-        const { getAleoBalance } = await import('@/lib/aleo/wallet');
-        const bal = await getAleoBalance(address);
+        const { getAleoBalanceFromWallet, getAleoBalance } = await import('@/lib/aleo/wallet');
+        
+        // Try to get balance from wallet first (includes private records)
+        let bal = await getAleoBalanceFromWallet();
+        
+        // If wallet balance is 0, try public balance from blockchain
+        if (bal === 0) {
+          bal = await getAleoBalance(address);
+        }
+        
         set({ walletBalance: bal });
       }
     } catch (error) {
@@ -175,10 +175,30 @@ export const createWalletSlice: StateCreator<WalletState> = (set, get) => ({
   },
 
   /**
-   * Set active network (BNB, SOL, SUI, XLM, XTZ or NEAR)
+   * Set active network (BNB, SOL, SUI, XLM, XTZ, NEAR or ALEO)
    */
   setNetwork: (network: 'BNB' | 'SOL' | 'SUI' | 'XLM' | 'XTZ' | 'NEAR' | 'ALEO' | null) => {
     set({ network });
+
+    // Auto-switch asset when network changes
+    const { setSelectedAsset } = get() as any;
+    if (setSelectedAsset) {
+      if (network === 'ALEO') {
+        setSelectedAsset('ALEO');
+      } else if (network === 'BNB') {
+        setSelectedAsset('BNB');
+      } else if (network === 'SOL') {
+        setSelectedAsset('SOL');
+      } else if (network === 'SUI') {
+        setSelectedAsset('SUI');
+      } else if (network === 'XLM') {
+        setSelectedAsset('XLM');
+      } else if (network === 'XTZ') {
+        setSelectedAsset('XTZ');
+      } else if (network === 'NEAR') {
+        setSelectedAsset('NEAR');
+      }
+    }
   },
 
   /**
