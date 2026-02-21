@@ -83,6 +83,12 @@ export async function POST(request: NextRequest) {
     // - Validating user exists
     // - Validating sufficient balance
     // - Inserting audit log entry with operation_type='bet_placed'
+    console.log('[Bet API] Calling deduct_balance_for_bet with:', {
+      p_user_address: userAddress,
+      p_bet_amount: betAmount,
+      p_currency: currency,
+    });
+    
     const { data, error } = await supabase.rpc('deduct_balance_for_bet', {
       p_user_address: userAddress,
       p_bet_amount: betAmount,
@@ -91,7 +97,13 @@ export async function POST(request: NextRequest) {
 
     // Handle database errors
     if (error) {
-      console.error('Database error in bet placement:', error);
+      console.error('[Bet API] Database error in bet placement:', error);
+      console.error('[Bet API] Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
       return NextResponse.json(
         { error: 'Service temporarily unavailable. Please try again.' },
         { status: 503 }

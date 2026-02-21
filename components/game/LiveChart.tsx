@@ -83,12 +83,15 @@ export const LiveChart: React.FC<LiveChartProps> = ({ betAmount, setBetAmount })
 
   const currencySymbol = useMemo(() => {
     switch (network) {
+      case 'ALEO': return 'ALEO';
       case 'XTZ': return 'XTZ';
       case 'NEAR': return 'NEAR';
       case 'SOL': {
         const state = useStore.getState() as any;
         return state.selectedCurrency || 'SOL';
       }
+      case 'SUI': return 'USDC';
+      case 'XLM': return 'XLM';
       default: return 'BNB';
     }
   }, [network]);
@@ -999,7 +1002,7 @@ export const LiveChart: React.FC<LiveChartProps> = ({ betAmount, setBetAmount })
                 fontFamily="monospace"
                 className="font-bold opacity-80"
               >
-                {bet.direction} {bet.amount} {currencySymbol} {bet.strikePrice && `@ $${bet.strikePrice.toFixed(2)}`}
+                {bet.direction} {bet.amount} {bet.network === 'SUI' ? 'USDC' : bet.network === 'SOL' ? 'SOL' : bet.network === 'XLM' ? 'XLM' : bet.network === 'XTZ' ? 'XTZ' : bet.network === 'NEAR' ? 'NEAR' : bet.network === 'ALEO' ? 'ALEO' : bet.network || currencySymbol} {bet.strikePrice && `@ $${bet.strikePrice.toFixed(2)}`}
               </text>
             </g>
           );
